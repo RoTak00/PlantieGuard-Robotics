@@ -2,13 +2,18 @@
 #include <AccessPoint.h>
 #include <PG_LCD.h>
 #include <Serial.h>
+#include <Utils.h>
 
 PG_LCD *lcd = new PG_LCD();
 PGAccessPoint *access_point = NULL;
 
+String WiFi_SSID = "", WiFi_PASS = "";
+
+PlantieGuardStatus status = INIT_ACESS_POINT;
+
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   while (!Serial)
     ;
 
@@ -18,12 +23,33 @@ void setup()
 
 void loop()
 {
-  if (access_point->getStatus() == 0)
+  switch (status)
   {
+  case INIT_ACESS_POINT:
     access_point->init();
-  }
-  else
-  {
-    access_point->poll();
+
+    if (access_point->getStatus() != 0)
+    {
+      status = POLLING_ACESS_POINT;
+    }
+    break;
+  case POLLING_ACESS_POINT:
+    access_point->poll(&WiFi_SSID, &WiFi_PASS);
+
+    if (access_point->getHasConnectionCredentials())
+    {
+      status = CONNECTING_WIFI;
+
+      Serial.print("SSID: ");
+      Serial.println(WiFi_SSID);
+      Serial.print("PASS: ");
+      Serial.println(WiFi_PASS);
+    }
+
+    break;
+  case CONNECTING_WIFI:
+    Serial.println("Connecting to WiFi");
+    delay(1000);
+    break;
   }
 }

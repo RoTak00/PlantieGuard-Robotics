@@ -213,5 +213,6 @@ void PGAccessPoint::_parseRequest(String *ssid, String *pass)
         this->has_connection_credentials = 1;
 
         WiFi.end();
+        
     }
 }

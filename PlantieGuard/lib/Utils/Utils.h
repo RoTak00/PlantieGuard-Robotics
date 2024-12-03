@@ -8,6 +8,8 @@ enum PlantieGuardStatus
     INIT_ACESS_POINT,
     POLLING_ACESS_POINT,
     CONNECTING_WIFI,
+    LOADING_WIFI,
+    CONNECTED_ACTIVE
 };
 
 #endif

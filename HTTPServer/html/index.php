@@ -1,15 +1,35 @@
 <?php
-$host = 'db'; // Matches the service name in docker-compose.yml
-$user = 'plantieguard_user';
-$password = 'password';
-$dbname = 'plantieguard';
 
-// Create connection
-$conn = new mysqli($host, $user, $password, $dbname);
+require_once 'config.php';
+require_once 'inc/db-config.php';
+require_once 'inc/functions.php';
+require_once 'inc/db-functions.php';
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+
+    if (isset($_GET['action'])) {
+        $action = $_GET['action'];
+
+        switch ($action) {
+            case 'ack':
+                include 'modules/ack.php';
+                break;
+
+            case 'data':
+                include 'modules/data.php';
+                break;
+
+            default:
+                include 'modules/info.php';
+                break;
+        }
+    } else {
+        include 'modules/info.php';
+        exit();
+    }
+} else {
+    include 'modules/info.php';
+    exit();
 }
-echo "Connected successfully to MySQL!";
-?>
+
+

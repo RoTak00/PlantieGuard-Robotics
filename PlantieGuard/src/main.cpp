@@ -5,15 +5,24 @@
 #include <Utils.h>
 #include <Secrets.h>
 #include <PG_WiFi.h>
+#include <PG_EEPROM.h>
+#include <PG_Sensors.h>
+#include <Wire.h>
 
 PG_LCD *lcd = new PG_LCD();
 PGAccessPoint *access_point = NULL;
 
 PG_WiFi *wifi = NULL;
 
-String WiFi_SSID = "", WiFi_PASS = "";
+PG_EEPROM *rom = NULL;
+
+PG_Sensors *sensors = NULL;
+
+String WiFi_SSID = "", WiFi_PASS = "", WiFi_UUID = "";
 
 PlantieGuardStatus status = INIT_ACESS_POINT;
+
+uint64_t last_ping = 0;
 
 void setup()
 {
@@ -21,7 +30,24 @@ void setup()
   while (!Serial)
     ;
 
-  access_point = new PGAccessPoint("PG_Setup_1.0", "12345678", lcd);
+  rom = new PG_EEPROM();
+  sensors = new PG_Sensors();
+
+  if (!rom->getUUID(WiFi_UUID))
+  {
+    WiFi_UUID = generateUUID();
+    rom->writeUUID(WiFi_UUID);
+  }
+
+  Serial.println("UUID: " + WiFi_UUID);
+
+  if (rom->getCredentials(WiFi_SSID, WiFi_PASS))
+  {
+    Serial.println("Credentials found");
+    status = CONNECTING_WIFI;
+  }
+
+  Wire.begin();
 }
 
 void loop()
@@ -29,6 +55,8 @@ void loop()
   switch (status)
   {
   case INIT_ACESS_POINT:
+
+    access_point = new PGAccessPoint("PG_Setup_1.0", "12345678", lcd);
     access_point->init();
 
     if (access_point->getStatus() != 0)
@@ -46,7 +74,7 @@ void loop()
 
     break;
   case CONNECTING_WIFI:
-    wifi = new PG_WiFi(WiFi_SSID, WiFi_PASS, SEND_HOST, lcd);
+    wifi = new PG_WiFi(WiFi_SSID, WiFi_PASS, WiFi_UUID, SEND_HOST, lcd);
     wifi->init();
 
     status = LOADING_WIFI;
@@ -57,11 +85,37 @@ void loop()
 
     if (wifi->getStatus() == WL_CONNECTED)
     {
-      Serial.println("Wifi connected");
-      if (wifi->connect())
+      rom->writeCredentials(WiFi_SSID, WiFi_PASS);
+
+      if (millis() - last_ping > 10000 || last_ping == false)
       {
-        Serial.println("Connected to server");
-        status = CONNECTED_ACTIVE;
+        if (wifi->connect())
+        {
+          Serial.println("Connected to server");
+          if (wifi->ping() == 1)
+          {
+            Serial.println("Sent ack successfully");
+            last_ping = millis();
+          }
+        }
+      }
+
+      if (wifi->readResponse() == 1)
+      {
+        JsonDocument json = wifi->getLastJson();
+
+        if (json.containsKey("version"))
+        {
+          String versionValue = json["version"].as<String>();
+          Serial.println("version " + versionValue);
+        }
+        if (json.containsKey("ack"))
+        {
+          String ackValue = json["ack"].as<String>();
+          Serial.println("ack " + ackValue);
+
+          status = CONNECTED_ACTIVE;
+        }
       }
     }
     else if (wifi->getStatus() == WL_IDLE_STATUS)
@@ -69,17 +123,33 @@ void loop()
       status = INIT_ACESS_POINT;
     }
 
-    delay(1000);
     break;
 
   case CONNECTED_ACTIVE:
 
-    if (wifi->ping() == 2)
+    if (millis() - last_ping > 5000)
     {
-      status = LOADING_WIFI;
+
+      Serial.println("In connected active");
+      if (wifi->connect())
+      {
+        Serial.println("Connected to server (ca)");
+        if (wifi->sendData("") == 2)
+        {
+          status = LOADING_WIFI;
+        }
+
+        last_ping = millis();
+      }
     }
 
-    wifi->readResponse();
+    if (wifi->readResponse())
+    {
+      JsonDocument json = wifi->getLastJson();
+
+      String ver = json['version'];
+      Serial.println(ver);
+    }
 
     break;
   }

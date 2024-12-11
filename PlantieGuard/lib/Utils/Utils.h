@@ -12,4 +12,8 @@ enum PlantieGuardStatus
     CONNECTED_ACTIVE
 };
 
+#define PING_INTERVAL 5000
+
+String generateUUID();
+
 #endif

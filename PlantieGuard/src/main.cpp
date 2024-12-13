@@ -7,7 +7,6 @@
 #include <PG_WiFi.h>
 #include <PG_EEPROM.h>
 #include <PG_Sensors.h>
-#include <Wire.h>
 
 PG_LCD *lcd = new PG_LCD();
 PGAccessPoint *access_point = NULL;
@@ -46,8 +45,6 @@ void setup()
     Serial.println("Credentials found");
     status = CONNECTING_WIFI;
   }
-
-  Wire.begin();
 }
 
 void loop()
@@ -153,4 +150,8 @@ void loop()
 
     break;
   }
+
+  // delay(5000);
+
+  // sensors->test();
 }

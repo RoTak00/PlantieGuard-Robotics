@@ -83,11 +83,11 @@ The other pins are connected as follows:
 
 ## Hardware: Block Diagram
 
-<a href = "https://images.roberttakacs.ro/github/robotica_proiect/block_diagram.png" target = "_blank"><img src = "https://images.roberttakacs.ro/github/robotica_proiect/block_diagram.png" width = "300"></a>
+<a href = "https://images.roberttakacs.ro/github/robotica_proiect/block-diagram.png" target = "_blank"><img src = "https://images.roberttakacs.ro/github/robotica_proiect/block-diagram.png" width = "300"></a>
 
 ## Hardware: Circuit Diagram
 
-<a href = "https://images.roberttakacs.ro/github/robotica_proiect/electrical_diagram.png" target = "_blank"><img src = "https://images.roberttakacs.ro/github/robotica_proiect/electrical_diagram.png" width = "300"></a>
+<a href = "https://images.roberttakacs.ro/github/robotica_proiect/electrical-diagram.png" target = "_blank"><img src = "https://images.roberttakacs.ro/github/robotica_proiect/electrical-diagram.png" width = "300"></a>
 
 ### Circuit Diagram Notes
 

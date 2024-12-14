@@ -88,32 +88,5 @@ void PG_Sensors::test()
         Serial.println(F("power FAIL, VDD < +2.25v"));
     }
 
-    /* read device ID */
-    Serial.print(F("Sensor ID.................: "));
-
-    htValue = mt_sensor->readDeviceID(); // return 21, 7021, 7020, 7013, 7006 & 7000 for Si70xx engineering samples
-
-    if (htValue != HTU2XD_SHT2X_SI70XX_ERROR)
-    {
-        Serial.println(htValue);
-    }
-    else
-    {
-        Serial.println(F("<error>"));
-    }
-
-    /* read FW version */
-    Serial.print(F("Sensor FW.................: "));
-
-    htValue = mt_sensor->readFirmwareVersion(); // return 1=v1.0, 2=v2.0
-
-    if (htValue != HTU2XD_SHT2X_SI70XX_ERROR)
-    {
-        Serial.print(F("v"));
-        Serial.println(htValue);
-    }
-    else
-    {
-        Serial.println(F("<error>"));
-    }
+    
 }

@@ -1,0 +1,19 @@
+<?php
+
+$SITE_NAME = "PlantieGuard";
+
+$SERVERNAME = "db";
+$USERNAME = "plantieguard_user";
+$PASSWORD = "password";
+$DATABASE = "plantieguard";
+
+$HOST = 'http://localhost:8082';
+$IS_LOCAL = true;
+
+$PHP_DISPLAY_ERRORS = 1;
+$PHP_DISPLAY_STARTUP_ERRORS = 1;
+error_reporting(1);
+
+$DEFAULT_TIMEZONE = "UTC";
+
+?>

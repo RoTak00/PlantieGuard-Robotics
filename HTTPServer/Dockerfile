@@ -6,14 +6,9 @@ RUN apt-get update && apt-get install -y nginx libpng-dev libjpeg-dev libfreetyp
     && docker-php-ext-install pdo_mysql mysqli gd \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy custom Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copy website files
-COPY html /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
 
-# Start PHP-FPM and Nginx
+# Set default command to start PHP-FPM and Nginx
 CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]

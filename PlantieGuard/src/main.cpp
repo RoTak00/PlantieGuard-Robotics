@@ -8,7 +8,7 @@
 #include <PG_EEPROM.h>
 #include <PG_Sensors.h>
 
-PG_LCD *lcd = new PG_LCD();
+PG_LCD *lcd = NULL;
 PGAccessPoint *access_point = NULL;
 
 PG_WiFi *wifi = NULL;
@@ -40,11 +40,14 @@ void setup()
 
   Serial.println("UUID: " + WiFi_UUID);
 
-  if (rom->getCredentials(WiFi_SSID, WiFi_PASS))
-  {
-    Serial.println("Credentials found");
-    status = CONNECTING_WIFI;
-  }
+  // if (rom->getCredentials(WiFi_SSID, WiFi_PASS))
+  // {
+  //   Serial.println("Credentials found");
+  //   status = CONNECTING_WIFI;
+  // }
+  lcd = new PG_LCD();
+
+  lcd->print("PlantieGuard", "Initializing");
 }
 
 void loop()
@@ -53,7 +56,7 @@ void loop()
   {
   case INIT_ACESS_POINT:
 
-    access_point = new PGAccessPoint("PG_Setup_1.0", "12345678", lcd);
+    access_point = new PGAccessPoint("PG_Setup_1.0", "12345678", lcd, WiFi_UUID);
     access_point->init();
 
     if (access_point->getStatus() != 0)
@@ -89,6 +92,7 @@ void loop()
         if (wifi->connect())
         {
           Serial.println("Connected to server");
+          lcd->print("PlantieGuard", "Connected");
           if (wifi->ping() == 1)
           {
             Serial.println("Sent ack successfully");
@@ -124,14 +128,18 @@ void loop()
 
   case CONNECTED_ACTIVE:
 
-    if (millis() - last_ping > 5000)
+    if (millis() - last_ping > 10000)
     {
+      Serial.println("Reading sensors");
+
+      String sensors_url = sensors->getURLEncodedData();
 
       Serial.println("In connected active");
       if (wifi->connect())
       {
         Serial.println("Connected to server (ca)");
-        if (wifi->sendData("") == 2)
+        lcd->print("PlantieGuard", "Sending data");
+        if (wifi->sendData(sensors_url) == 2)
         {
           status = LOADING_WIFI;
         }
@@ -146,12 +154,12 @@ void loop()
 
       String ver = json['version'];
       Serial.println(ver);
+
+      lcd->print("PlantieGuard", "OK");
     }
 
     break;
   }
 
-  // delay(5000);
-
-  // sensors->test();
+  lcd->update();
 }

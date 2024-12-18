@@ -88,5 +88,96 @@ void PG_Sensors::test()
         Serial.println(F("power FAIL, VDD < +2.25v"));
     }
 
-    
+    Serial.print(F("Soil moisture..................:"));
+
+    uint16_t soil_moisture_out = analogRead(MOISTURE_PIN);
+
+    float val_a = soil_moisture_out - MOISTURE_LOWER_WET;
+    float val_b = MOISTURE_UPPER_DRY - MOISTURE_LOWER_WET;
+
+    float percentage_value = (1 - (float)val_a / val_b) * 100;
+
+    Serial.print(percentage_value);
+
+    Serial.println(F("%"));
+}
+
+float PG_Sensors::getHumidity(uint8_t *error)
+{
+    *error = 0;
+    float htValue = mt_sensor->readHumidity(); // accuracy +-2% in range 20%..80%/25C at 12-bit
+
+    if (htValue != HTU2XD_SHT2X_SI70XX_ERROR)
+    {
+        return htValue;
+    }
+    else
+    {
+        Serial.println(F("<error>"));
+        *error = 1;
+        return 0;
+    }
+}
+
+float PG_Sensors::getSoilHumidity(uint8_t *error)
+{
+    *error = 0;
+    uint16_t soil_moisture_out = analogRead(MOISTURE_PIN);
+
+    float val_a = soil_moisture_out - MOISTURE_LOWER_WET;
+    float val_b = MOISTURE_UPPER_DRY - MOISTURE_LOWER_WET;
+
+    float percentage_value = (1 - (float)val_a / val_b) * 100;
+
+    return percentage_value;
+}
+
+float PG_Sensors::getTemperature(uint8_t *error)
+{
+    *error = 0;
+    float htValue = mt_sensor->readTemperature(); // accuracy +-0.3C in range 0C..60C at 14-bit
+
+    if (htValue != HTU2XD_SHT2X_SI70XX_ERROR) // HTU2XD_SHT2X_SI70XX_ERROR = 255, library returns 255 if error occurs
+    {
+        return htValue;
+    }
+    else
+    {
+        Serial.println(F("<error>"));
+
+        mt_sensor->softReset();
+        mt_sensor->setHeater(false);
+        mt_sensor->setResolution(HUMD_12BIT_TEMP_14BIT);
+        *error = 1;
+        return 0;
+    }
+}
+
+String PG_Sensors::getURLEncodedData()
+{
+
+    String url = "";
+    uint8_t error_marker = 0;
+    float humidity = getHumidity(&error_marker);
+
+    if (error_marker == 0)
+    {
+        url += "&humidity=" + String(humidity);
+    }
+
+    float temperature = getTemperature(&error_marker);
+
+    if (error_marker == 0)
+    {
+        url += "&temperature=" + String(temperature);
+    }
+
+    float humidity_soil = getSoilHumidity(&error_marker);
+
+    if (error_marker == 0)
+    {
+        url += "&humidity_soil=" + String(humidity_soil);
+    }
+
+    return url;
 }

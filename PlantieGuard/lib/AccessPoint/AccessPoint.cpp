@@ -1,7 +1,8 @@
 #include <AccessPoint.h>
+#include <Secrets.h>
 #include "WiFiS3.h"
 
-PGAccessPoint::PGAccessPoint(String ssid, String pass, PG_LCD *lcd)
+PGAccessPoint::PGAccessPoint(String ssid, String pass, PG_LCD *lcd, String uuid)
 {
     this->_ssid = ssid;
     this->_pass = pass;
@@ -10,6 +11,7 @@ PGAccessPoint::PGAccessPoint(String ssid, String pass, PG_LCD *lcd)
 
     this->_port = 80;
     this->_lcd = lcd;
+    this->_uuid = uuid;
 
     this->has_connection_credentials = false;
 }
@@ -22,6 +24,8 @@ PGAccessPoint::PGAccessPoint()
     this->_status = WL_IDLE_STATUS;
 
     this->_port = 80;
+    this->_lcd = NULL;
+    this->_uuid = "";
 
     this->has_connection_credentials = false;
 }
@@ -44,14 +48,12 @@ uint8_t PGAccessPoint::init()
         Serial.println("WiFi firmware outdated.");
     }
 
-    // this->_lcd->print("Creating access point named: ");
-    // this->_lcd->print(this->_ssid);
-    // this->_lcd->print("Pass");
-    // this->_lcd->print(this->_pass);
     Serial.print("Creating access point named: ");
     Serial.print(this->_ssid);
     Serial.print("Password ");
     Serial.println(this->_pass);
+
+    this->_lcd->printLong("Connect to " + this->_ssid + " pass " + this->_pass, 0);
 
     this->_status = WiFi.beginAP(this->_ssid.c_str(), this->_pass.c_str());
     if (this->_status != WL_AP_LISTENING)
@@ -69,6 +71,8 @@ uint8_t PGAccessPoint::init()
     // this->_lcd->print(ip);
     Serial.print("Connect to http://");
     Serial.println(ip);
+
+    this->_lcd->printLong("Go to http://" + ip.toString(), 1);
     return 0;
 }
 
@@ -113,10 +117,12 @@ uint8_t PGAccessPoint::poll(String *ssid, String *pass)
         }
         this->_client.stop();
         Serial.println("Client disconnected.");
+        this->_lcd->print("Connected!");
     }
 
     if (this->has_connection_credentials)
     {
+
         return 1;
     }
     return 0;
@@ -175,6 +181,17 @@ void PGAccessPoint::_sendHTMLHead()
     this->_client.println("margin: 4px 2px;");
     this->_client.println("cursor: pointer;");
     this->_client.println("}");
+    this->_client.println("a.button {");
+    this->_client.println("background-color: #4CAF50;");
+    this->_client.println("color: white;");
+    this->_client.println("padding: 10px 20px;");
+    this->_client.println("text-align: center;");
+    this->_client.println("text-decoration: none;");
+    this->_client.println("display: block;");
+    this->_client.println("font-size: 16px;");
+    this->_client.println("margin: 0 auto;");
+    this->_client.println("cursor: pointer;");
+    this->_client.println("}");
     this->_client.println("</style>");
     this->_client.println("</head>");
 }
@@ -199,6 +216,23 @@ void PGAccessPoint::_sendHTMLIndex()
     this->_client.println("</html>");
 }
 
+void PGAccessPoint::_sendHTMLOK()
+{
+    this->_sendHTMLHead();
+    this->_client.println("<body>");
+    this->_client.println("<h1><span class = 'badge'>PlantieGuard Setup</span> </h1>");
+    this->_client.println("<p>Looking good! PlantieGuard connected</p>");
+    this->_client.println("<h2>Next Steps</h2>");
+    this->_client.println("<p>PlantieGuard has already begun sending your plantie's data to the server. Now it's time to connect your devices so you can monitor your plants.</p>");
+    this->_client.print("<a class = \"button\" href = 'https://");
+    this->_client.print(APP_HOST);
+    this->_client.print("/account/register/");
+    this->_client.print(_uuid);
+    this->_client.print("'>Continue</a>");
+    this->_client.println("</body>");
+    this->_client.println("</html>");
+}
+
 void PGAccessPoint::_parseRequest(String *ssid, String *pass)
 {
     if (this->_last_request.indexOf("GET /setup") != -1)
@@ -210,9 +244,10 @@ void PGAccessPoint::_parseRequest(String *ssid, String *pass)
         *ssid = wifi_ssid;
         *pass = wifi_pass;
 
+        this->_sendHTMLOK();
+        WiFi.end();
         this->has_connection_credentials = 1;
 
-        WiFi.end();
-        
+        this->_lcd->print("WiFi received!");
     }
 }

@@ -153,17 +153,17 @@ String PG_WiFi::createAck()
     ack += "Host: " + _host + "\r\n";
     ack += "Connection: close\r\n\r\n";
 
-    Serial.println(ack);
     return ack;
 }
 
 String PG_WiFi::createSendData(String url_encoded_data)
 {
-    String ack = "GET /?action=data&token = " + _uuid;
+    String ack = "GET /?action=data&token=" + _uuid;
     ack += url_encoded_data;
-    ack += " HTTP / 1.1\r\n ";
+    ack += " HTTP/1.1\r\n";
     ack += "Host: " + _host + "\r\n";
     ack += "Connection: close\r\n\r\n";
+
     return ack;
 }
 

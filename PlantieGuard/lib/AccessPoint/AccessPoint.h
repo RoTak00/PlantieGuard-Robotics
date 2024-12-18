@@ -25,10 +25,11 @@ private:
 
 private:
     PG_LCD *_lcd;
+    String _uuid;
 
 public:
     // Constructor. Initialise Access Point with credentials
-    PGAccessPoint(String ssid, String pass, PG_LCD *lcd);
+    PGAccessPoint(String ssid, String pass, PG_LCD *lcd, String uuid);
     PGAccessPoint();
     uint8_t init();
     uint8_t poll(String *ssid, String *pass);
@@ -41,6 +42,7 @@ public:
 private:
     void _sendHTMLHead();
     void _sendHTMLIndex();
+    void _sendHTMLOK();
     void _parseRequest(String *ssid, String *pass);
 };
 

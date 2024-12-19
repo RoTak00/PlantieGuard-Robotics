@@ -19,7 +19,7 @@ $user_timezone = $geo_data['geoplugin_timezone'] ?? "UTC";
 
 // Create database connection
 $conn = new mysqli($SERVERNAME, $USERNAME, $PASSWORD, $DATABASE);
-
+$conn->set_charset("utf8mb4");
 
 // Check connection
 if ($conn->connect_error) {

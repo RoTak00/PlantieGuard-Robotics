@@ -1,3 +1,30 @@
-
+.notification {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  margin-bottom: 2em;
+  border: 2px solid black;
+}
+.notification.error {
+  background-color: rgb(255, 164, 164);
+  border-color: red;
+  color: darkred;
+}
+.notification.success {
+  background-color: rgb(164, 255, 164);
+  border-color: green;
+  color: darkgreen;
+}
+.notification.warning {
+  background-color: rgb(255, 255, 164);
+  border-color: orange;
+  color: darkorange;
+}
+.notification.info {
+  background-color: rgb(164, 164, 255);
+  border-color: blue;
+  color: darkblue;
+}
 
 /*# sourceMappingURL=notifications.css.map */

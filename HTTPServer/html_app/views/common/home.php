@@ -1,4 +1,6 @@
 <?= $head ?>
 
-<h1>PlantieGuard!</h1>
+<?= $navigation ?>
+
+<?= $current_device_data ?>
 <?= $footer ?>

@@ -16,6 +16,11 @@ class User
         return $this->id;
     }
 
+    public function getId()
+    {
+        return $this->id;
+    }
+
     public function __construct($registry)
     {
         $this->registry = $registry;
@@ -92,6 +97,24 @@ class User
 
     }
 
+    public function register($name, $email, $password)
+    {
+        $sql_check = "SELECT * FROM users WHERE email = '" . $this->db->escape($email) . "'";
+
+        $result = $this->db->query($sql_check);
+
+        if ($result->num_rows > 0) {
+            return false;
+        }
+
+        $sqlq = "INSERT INTO users(name, email, password) VALUES ('" . $this->db->escape($name) . "', '" . $this->db->escape($email) . "', '" . $this->db->escape(password_hash($password, PASSWORD_DEFAULT)) . "')";
+
+        $result = $this->db->query($sqlq);
+
+        return true;
+
+    }
+
     public function logout()
     {
         $this->RemoveAuthToken($this->session->data['auth_token']);
@@ -126,7 +149,7 @@ class User
     private function GetAuthToken($token)
     {
         $sqlq = "SELECT a.valid, a.token, a.user_id, u.name, u.email FROM auth_session a INNER JOIN 
-        users u ON u.id = a.user_id WHERE token = '" . $token . "' AND original_ip = '" . $this->db->escape($this->request->ip) . "'";
+        users u ON u.id = a.user_id WHERE a.token = '" . $token . "' AND original_ip = '" . $this->db->escape($this->request->ip) . "'";
 
         $result = $this->db->query($sqlq);
 

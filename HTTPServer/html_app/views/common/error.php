@@ -1,6 +1,5 @@
 <?= $head ?>
 
-<h1>PlantieGuard!</h1>
+<?= $navigation ?>
 
-<p>That page wasn't found...</p>
 <?= $footer ?>

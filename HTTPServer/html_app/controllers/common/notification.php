@@ -5,7 +5,7 @@ class CommonNotificationController extends BaseController
 
     public function index()
     {
-        $this->response->addStyle('/admin/resources/css/common/notification.css');
+        $this->response->addStyle('/resources/css/common/notifications.css');
         $data = [];
         $notifications = $this->notification->get();
         $this->notification->clear();

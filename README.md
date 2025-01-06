@@ -106,7 +106,63 @@ The other pins are connected as follows:
 
 # Software Design
 
-(TODO)
+The software built to power the application consists of three separate services collaborating:
+
+- The software on the Arduino Microcontroller to connect to a WiFi network and send data to the remote server;
+- The endpoints where the remote server acknowledges a new device and accepts incoming data
+- The web application where the end-user can visualize their plants' data.
+
+## Arduino Software
+
+In this repository, in the [PlantieGuard](PlantieGuard/) folder resides the Platformio project used to compile the source code for the controller. There, the [src](PlantieGuard/src/) folder contains the main functions of the program (setup and loop), while the [lib](PlantieGuard/lib/) folder contains all the written libraries to power the application.
+
+Additionally, the [ArduinoJson](https://docs.arduino.cc/libraries/arduinojson/) and the [LiquidCrystal](https://github.com/fmalpartida/New-LiquidCrystal) libraries are installed for functionality.
+
+### Setup and Main Loop
+
+On first initialisation, the Arduino board initialises the libraries written to handle the EEPROM, the Sensors, and the LCD, and creates or retrieves the device's UUID from the flash memory and retrieves the saved WiFi network, if it exists.
+
+If the WiFi network does not exist, the device creates an access point using the PGAccessPoint class and instructs the user to connect to the network. Once connected, the user is instructed to access an url that will open up a setup page on their browser, allowing the user to offer WiFi connection credentials to the PlantieGuard board and then register their account to see PlantieGuard data.
+
+The board attempts to connect to the network with the received WiFi credentials (or the ones stored in the EEPROM), and saves them to the memory if successful. It sends an acknowledge request to the API server and waits for a response to verify that everything is in order. If so, the device begins sending its sensor data to the API server every 10 seconds.
+
+### Deep dive into the Access Point class
+
+The [PGAccessPoint](PlantieGuard/lib/AccessPoint/) is one of the more complex classes written for the PlantieGuard software. Whenever a client accesses its local IP, it sends an HTML 1.1 document, consisting of a styled page with a form to request connection credentials.
+
+If the client sends a request to the /setup endpoint, it checks the HTTP request and parses for the sent ssid and password. If this data is received correctly, it sends an HTML 1.1 document containing a button to the mobile application where the user, based on the device's UUID, may register an account or connect to their existing account.
+
+### Deep dive into the PG_EEPROM class
+
+The [PG_EEPROM](PlantieGuard/lib/PG_EEPROM/) class allows the saving and retrieving of the UUID and WiFi credentials on the device's flash memory. It uses a custom format to check for data validity, saving the UUID at the first byte of memory, with a header of an 'u0' and two zeroes after, and directly after saves the credentials, like this:
+
+```
+s0[ssid_variable_length]00p0[password_variable_length]00
+```
+
+In this way, it is ensured that data stored is valid. If no valid data is found, it is requested or generated.
+
+## API endpoints
+
+The code for the API where the Arduino board sends acknowledgements and sensor data is found in the [html_api](HTTPServer/html_api/) folder.
+
+The structure is very simplistic and exposes three endpoints:
+
+- ack, where the server expects a UUID, checks it for validity and checks if it exists or not already on the server
+- data, where the server expects sensor data from a specific UUId
+- info, which offers server information, used as a fallback endpoint
+
+! This document server can be tested locally by running the makefile in the [HTTPServer](HTTPServer/) folder. Requires docker-compose
+
+## Web Application
+
+The code for the Web Application is found in the [html_app](HTTPServer/html_app/) folder, and is written using a custom PHP MVC created by me.
+
+The first page that the user will encounter is the register page, where they're sent once they first setup their PlantieGuard device. The controller expects a UUID, which it saves in to the session storage and uses to link the device to the account. Once registered, the user is automatically logged in.
+
+If ever logged out, the user may connect to their account from the login page.
+
+Once logged in, the user may see current live sensor information from their PlantieGuard only, on the home page, loaded by the data/data/current controller.
 
 # Results
 

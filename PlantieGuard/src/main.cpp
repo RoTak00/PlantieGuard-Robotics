@@ -40,11 +40,11 @@ void setup()
 
   Serial.println("UUID: " + WiFi_UUID);
 
-  // if (rom->getCredentials(WiFi_SSID, WiFi_PASS))
-  // {
-  //   Serial.println("Credentials found");
-  //   status = CONNECTING_WIFI;
-  // }
+  if (rom->getCredentials(WiFi_SSID, WiFi_PASS))
+  {
+    Serial.println("Credentials found");
+    status = CONNECTING_WIFI;
+  }
   lcd = new PG_LCD();
 
   lcd->print("PlantieGuard", "Initializing");

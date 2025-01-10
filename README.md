@@ -116,7 +116,7 @@ The software built to power the application consists of three separate services 
 
 In this repository, in the [PlantieGuard](PlantieGuard/) folder resides the Platformio project used to compile the source code for the controller. There, the [src](PlantieGuard/src/) folder contains the main functions of the program (setup and loop), while the [lib](PlantieGuard/lib/) folder contains all the written libraries to power the application.
 
-Additionally, the [ArduinoJson](https://docs.arduino.cc/libraries/arduinojson/) and the [LiquidCrystal](https://github.com/fmalpartida/New-LiquidCrystal) libraries are installed for functionality.
+Additionally, the [ArduinoJson](https://docs.arduino.cc/libraries/arduinojson/), the [LiquidCrystal](https://github.com/fmalpartida/New-LiquidCrystal) and the [HTU2xD_SHT2x_Si70xx](https://github.com/enjoyneering/HTU2xD_SHT2x_Si70xx) libraries are installed for functionality.
 
 ### Setup and Main Loop
 
@@ -142,6 +142,44 @@ s0[ssid_variable_length]00p0[password_variable_length]00
 
 In this way, it is ensured that data stored is valid. If no valid data is found, it is requested or generated.
 
+### Used libraries
+
+| Library + Link                                                             | Description                                                                                                                                                                                                                                                                                                    |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ArduinoJson](https://docs.arduino.cc/libraries/arduinojson/)              | "A simple and efficient JSON library for embedded C++". Used for parsing incoming JSON data from the PlantieGuard API server. Not critical functionality, because the PlantieGuard does not actually use the response for taking actions. Would have been used if actual watering would have been implemented. |
+| [LiquidCrystal](https://github.com/fmalpartida/New-LiquidCrystal)          | Standard Arduino library for the LCD. Several functions have been created to improve the LCD's functionality and allow text longer than the LCD's width to be displayed.                                                                                                                                       |
+| [HTU2xD_SHT2x_Si70xx](https://github.com/enjoyneering/HTU2xD_SHT2x_Si70xx) | Library for the I2C Humidty & Temperature sensor. Provides functions to greatly ease the use of the I2C sensor, which has rather complicated functions.                                                                                                                                                        |
+
+### Functionalities from the labs
+
+1. The Serial Monitor was extensively used for debugging the project (Lab 1 - USART. Debugging)
+2. The Soil Humidty sensor sends its sensor data as an analog value, which is parsed to transform from a 0% to a 100% humidity. (Lab 4 - ADC)
+3. The Humidity & Temperature sensor uses I2C to function. (Lab 6 - I2C)
+
+### Calibration of Sensors
+
+The I2C sensor (Humidity & Soil) did not need calibration.
+
+The Soil Humidty sensor's output is an analog value. The device's (very very concise) datasheet proposes measuring the output value in air and the output value while submerged in water. These values are used as edges for a mapping between 0 and 100, representing 0 (dry) and 100 (water) to use for soil measurements. As seen in the PG_Sensors.h file
+
+```
+const uint16_t MOISTURE_UPPER_DRY = 500;
+const uint16_t MOISTURE_LOWER_WET = 200;
+
+float PG_Sensors::getSoilHumidity(uint8_t *error)
+{
+    *error = 0;
+    uint16_t soil_moisture_out = analogRead(MOISTURE_PIN);
+
+    float val_a = soil_moisture_out - MOISTURE_LOWER_WET;
+    float val_b = MOISTURE_UPPER_DRY - MOISTURE_LOWER_WET;
+
+    float percentage_value = (1 - (float)val_a / val_b) * 100;
+
+    return percentage_value;
+}
+```
+
 ## API endpoints
 
 The code for the API where the Arduino board sends acknowledgements and sensor data is found in the [html_api](HTTPServer/html_api/) folder.
@@ -158,16 +196,45 @@ The structure is very simplistic and exposes three endpoints:
 
 The code for the Web Application is found in the [html_app](HTTPServer/html_app/) folder, and is written using a custom PHP MVC created by me.
 
-The first page that the user will encounter is the register page, where they're sent once they first setup their PlantieGuard device. The controller expects a UUID, which it saves in to the session storage and uses to link the device to the account. Once registered, the user is automatically logged in.
+The first page that the user will encounter is the register page, where they're sent once they first setup their PlantieGuard device. The controller expects a validated UUID, which it saves in to the session storage and uses to link the device to the account. Once registered, the user is automatically logged in.
 
 If ever logged out, the user may connect to their account from the login page.
 
-Once logged in, the user may see current live sensor information from their PlantieGuard only, on the home page, loaded by the data/data/current controller.
+Once logged in, the user may see current live sensor information from their PlantieGuard only, on the home page, loaded by the data/data/current controller. They can also see their PlantieGuard device history, to get a sense of the past measurments of the plant's environment.
+
+### Validating a UUID
+
+A user may not register with an invalid UUID. The way the website validates a UUID is the following:
+
+1. Once the PlantieGuard performs an ACK request to the /ack endpoint of the API, the server will verify the provided UUID. If the UUID is new and correct, it will be added to the pg_devices table. Providing an already existent UUID will not produce any change in the database.
+2. The PlantieGuard will send the user to the /account/register/uuid/[uuid] endpoint of the application website. If the UUID is not present, they will be prompted to set up their PlantieGuard device first. If the UUID appears in the pg_devices table and there is no associated user to the UUID, it will allow the user to register. Otherwise, the user is sent to the login page to connect to their already-existent account.
 
 # Results
 
 (TODO)
 
-# Conclusions
+# Future Implementations
 
-(TODO)
+## Automated Watering System
+
+An extremely relevant system that is missing from the current form of the project is an automated watering system. Two variants are possible to implement, and both require various additions to both the software and the hardware of the project. The first one would be to have the PlantieGuard decide by itself whenever it should water the plant, and the other one would involve the user actioning a button on the application website to announce the PlantieGuard that it must water the plant.
+
+### Hardware
+
+A water tank needs to be added to the device, with an actionable water pump. Additionally, there should exist a sensor to verify the remaining quantity of water in the water tank, for prompting the user that they need to refill the water tank. An even more advanced implementation would connect to the water pumps of the house, but we're going a bit too far with this one...
+
+### Software
+
+The use of ArduinoJSON allows the Arduino Board's processor to read the responses from the API server. The proposed implementation is a polling one. As the watering is not a time-delicate operation, the server could, whenever the PlantieGuard sends parameter data, to add a response field announcing that the PlantieGuard should water the plant. If this field is received, the PlantieGuard would action the pump for a fixed amount of time (or a variable one, based on the Server's response). This method would be more reliable because different plants require different watering and humidity conditions, and having the PlantieGuard decide by itself whenever to water a plant would most likely fail without use of manual tuning tools.
+
+## Power Management
+
+The device should not have the WiFi and the LCD modules turned on at all times. A much more power-efficient implementation would completely turn off the device after every data send and restart it using a watchdog timer or through the existent reset button. The device saves connection data to its ROM, so the user need not worry about the PlantieGuard not being able to reconnect to the server to send data. If data is sent every 10 minutes, the device would be fully powered only for a few seconds during that time.
+
+## Account Improvements
+
+The account system lacks several important tools, such as account editing (e-mail, password, name), the "password forgotten" setting or the "remember me" tool. These are not difficult to implement (except the password forgotten, which involves using a mailing server), but as the project's scope is not Web Development, they were not a priority for the project.
+
+## Multiple PlantieGuards per Account
+
+In a real-use case, a user may desire to use multiple PlantieGuards and administer them all at once, through the same account. A future implementation would allow a user to associate a PlantieGuard to an existing account. Then, they could add images, names, or set at what parameters a plant should be watered by the PlantieGuard for more automation.

@@ -13,6 +13,8 @@ public:
 
     uint8_t writeUUID(String uuid);
 
+    void clear();
+
 private:
     const uint8_t CREDENTIALS_START = 40;
     const uint8_t UUID_LENGTH = 36;

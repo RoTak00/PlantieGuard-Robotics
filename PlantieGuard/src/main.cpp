@@ -48,6 +48,8 @@ void setup()
   lcd = new PG_LCD();
 
   lcd->print("PlantieGuard", "Initializing");
+
+  initResetButton();
 }
 
 void loop()
@@ -61,10 +63,18 @@ void loop()
 
     if (access_point->getStatus() != 0)
     {
+      Serial.println("in polling acc");
       status = POLLING_ACESS_POINT;
     }
     break;
   case POLLING_ACESS_POINT:
+
+    if (access_point->getStatus() == 0)
+    {
+      status = INIT_ACESS_POINT;
+      break;
+    }
+
     access_point->poll(&WiFi_SSID, &WiFi_PASS);
 
     if (access_point->getHasConnectionCredentials())
@@ -87,7 +97,7 @@ void loop()
     {
       rom->writeCredentials(WiFi_SSID, WiFi_PASS);
 
-      if (millis() - last_ping > 10000 || last_ping == false)
+      if (millis() - last_ping > PING_INTERVAL || last_ping == false)
       {
         if (wifi->connect())
         {
@@ -159,6 +169,21 @@ void loop()
     }
 
     break;
+  }
+
+  // If the reset button has been pressed, clear out the memory and reset the device
+  if (checkResetButton())
+  {
+    lcd->print("PlantieGuard", "Resetting");
+    rom->clear();
+    status = INIT_ACESS_POINT;
+
+    WiFi_SSID = "";
+    WiFi_PASS = "";
+    WiFi_UUID = "";
+
+    WiFi_UUID = generateUUID();
+    rom->writeUUID(WiFi_UUID);
   }
 
   lcd->update();

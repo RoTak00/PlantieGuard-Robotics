@@ -1,5 +1,6 @@
 #include <EEPROM.h>
 #include <PG_EEPROM.h>
+#include <Serial.h>
 
 PG_EEPROM::PG_EEPROM() {}
 
@@ -150,4 +151,16 @@ uint8_t PG_EEPROM::getCredentials(String &ssid, String &pass)
         i++;
     }
     return 1;
+}
+
+void PG_EEPROM::clear()
+{
+    // EEPROM is big, so we clear up to 512
+    Serial.println("Clearing EEPROM");
+    for (int i = 0; i < (1 << 9); i++)
+    {
+
+        Serial.println(i);
+        EEPROM.write(i, 0);
+    }
 }

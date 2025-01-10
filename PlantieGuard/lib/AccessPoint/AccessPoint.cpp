@@ -226,7 +226,7 @@ void PGAccessPoint::_sendHTMLOK()
     this->_client.println("<p>PlantieGuard has already begun sending your plantie's data to the server. Now it's time to connect your devices so you can monitor your plants.</p>");
     this->_client.print("<a class = \"button\" href = 'https://");
     this->_client.print(APP_HOST);
-    this->_client.print("/account/register/");
+    this->_client.print("/account/register/uuid/");
     this->_client.print(_uuid);
     this->_client.print("'>Continue</a>");
     this->_client.println("</body>");

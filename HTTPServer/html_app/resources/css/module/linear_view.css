@@ -1,0 +1,33 @@
+.linear-view-container {
+  width: 100%; /* Full width container */
+  border: 1px solid #ddd; /* Border for the bar */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #f4f4f4; /* Light gray background */
+  overflow: hidden; /* Ensure the bar stays inside */
+  position: relative; /* Position for inner elements */
+  padding: 5px;
+}
+
+.linear-view-bar {
+  height: 20px; /* Height of the progress bar */
+  border-radius: 5px; /* Rounded corners match the container */
+  transition: width 0.5s ease-in-out; /* Smooth animation for width changes */
+}
+
+.linear-view-title {
+  font-size: 18px; /* Adjust font size */
+  margin-bottom: 10px; /* Add space below the title */
+  text-align: center; /* Center the title */
+}
+
+.linear-view-value {
+  position: absolute; /* Overlay the value */
+  right: 10px; /* Slight padding from the right */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Adjust vertical centering */
+  font-weight: bold; /* Highlight the value */
+  color: #333; /* Dark text color */
+  font-size: 14px; /* Adjust font size */
+}
+
+/*# sourceMappingURL=linear_view.css.map */

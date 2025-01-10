@@ -30,6 +30,13 @@ class Response
 
     public function addStyle($path, $options = [])
     {
+        // if styles with path is found, skip
+        foreach ($this->styles as $style) {
+            if ($style['path'] == $path) {
+                return;
+            }
+        }
+
         $this->styles[] = [
             'path' => $path,
             'media' => $options['media'] ?? 'all',
@@ -41,6 +48,13 @@ class Response
 
     public function addScript($path, $options = [], $add_first = 0)
     {
+        // if scripts with path is found, skip
+        foreach ($this->scripts as $script) {
+            if ($script['path'] == $path) {
+                return;
+            }
+        }
+
         if ($add_first) {
             array_unshift($this->scripts, [
                 'path' => $path,

@@ -5,7 +5,7 @@ class DataDataModel extends BaseModel
     public function getDeviceData($limit = 0, $offset = 0)
     {
 
-        $sql = "SELECT * FROM pg_data pd 
+        $sql = "SELECT pd.humidity, pd.humidity_soil, pd.temperature, pd.date_added FROM pg_data pd 
         LEFT JOIN users u ON pd.token = u.token
         WHERE u.id = " . (int) $this->user->getId() . " 
         ORDER BY date_added DESC";

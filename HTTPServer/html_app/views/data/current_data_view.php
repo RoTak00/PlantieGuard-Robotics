@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container mb-5">
     <div class="row">
         <div class="col-md-12">
             <h2>Your Plantie </h2>
@@ -7,35 +7,15 @@
 
 
     <div class="row">
-        <div class="col-xs-12 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Humidity</h3>
-                </div>
-                <div class="panel-body">
-                    <h4><?= $humidity ?> %</h4>
-                </div>
-            </div>
+        <div class="col-xs-12 col-md-4 mt-2 mt-md-0">
+            <?= $humidity_linear ?>
+
         </div>
-        <div class="col-xs-12 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Soil Humidity</h3>
-                </div>
-                <div class="panel-body">
-                    <h4><?= $humidity_soil ?> %</h4>
-                </div>
-            </div>
+        <div class="col-xs-12 col-md-4 mt-2 mt-md-0">
+            <?= $humidity_soil_linear ?>
         </div>
-        <div class="col-xs-12 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Temperature</h3>
-                </div>
-                <div class="panel-body">
-                    <h4><?= $temperature ?> °C</h4>
-                </div>
-            </div>
+        <div class="col-xs-12 col-md-4 mt-2 mt-md-0">
+            <?= $temperature_linear ?>
         </div>
     </div>
 </div>

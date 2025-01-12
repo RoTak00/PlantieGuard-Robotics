@@ -26,8 +26,6 @@ uint64_t last_ping = 0;
 void setup()
 {
   Serial.begin(9600);
-  while (!Serial)
-    ;
 
   rom = new PG_EEPROM();
   sensors = new PG_Sensors();
@@ -178,11 +176,13 @@ void loop()
     rom->clear();
     status = INIT_ACESS_POINT;
 
+    Serial.println("UUID: " + WiFi_UUID);
     WiFi_SSID = "";
     WiFi_PASS = "";
     WiFi_UUID = "";
 
     WiFi_UUID = generateUUID();
+    Serial.println("UUID: " + WiFi_UUID);
     rom->writeUUID(WiFi_UUID);
   }
 

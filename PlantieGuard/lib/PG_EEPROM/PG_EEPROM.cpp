@@ -160,7 +160,10 @@ void PG_EEPROM::clear()
     for (int i = 0; i < (1 << 9); i++)
     {
 
-        Serial.println(i);
+        if (i % 50 == 0)
+        {
+            Serial.println(i);
+        }
         EEPROM.write(i, 0);
     }
 }

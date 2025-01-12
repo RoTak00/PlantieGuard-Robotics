@@ -211,7 +211,9 @@ A user may not register with an invalid UUID. The way the website validates a UU
 
 # Results
 
-(TODO)
+## Demonstration Video
+
+[![The PlantieGuard Device](https://images.roberttakacs.ro/github/robotica_proiect/yt_pic.png)](https://youtu.be/u58qoaO0StA)
 
 # Future Implementations
 

@@ -5,6 +5,7 @@ String generateUUID()
 {
     String uuid = "";
     const char hexChars[] = "0123456789abcdef";
+    randomSeed(millis());
 
     for (int i = 0; i < 36; i++)
     {
